@@ -1,0 +1,5 @@
+subset_name,feature_count,features
+Full (16 features),16,Power_lag_24h; Power_lag_1h; Power_lag_2h; Global_Horizontal_Radiation; Diffuse_Horizontal_Radiation; Day_cos; Day_sin; Hour_sin; Hour_cos; Weather_Temperature_Celsius; Wind_Direction_cos; Wind_Direction_sin; Month_cos; Month_sin; Weather_Relative_Humidity; Wind_Speed
+12 features,12,Power_lag_24h; Power_lag_1h; Power_lag_2h; Global_Horizontal_Radiation; Diffuse_Horizontal_Radiation; Day_cos; Day_sin; Hour_sin; Hour_cos; Weather_Temperature_Celsius; Wind_Direction_cos; Wind_Direction_sin
+8 features,8,Power_lag_24h; Power_lag_1h; Power_lag_2h; Global_Horizontal_Radiation; Diffuse_Horizontal_Radiation; Day_cos; Day_sin; Hour_sin
+5 features,5,Power_lag_24h; Power_lag_1h; Power_lag_2h; Global_Horizontal_Radiation; Diffuse_Horizontal_Radiation

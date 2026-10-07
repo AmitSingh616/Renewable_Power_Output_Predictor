@@ -1,0 +1,5 @@
+subset_name,feature_count,features
+Full (16 features),16,Wind_Speed; Power_lag_1h; Power_lag_2h; Blade_Pitch_Angle; Day_cos; Nacelle_Position_sin; Day_sin; Wind_Direction_cos; Power_lag_24h; Wind_Direction_sin; Nacelle_Position_cos; Ambient_Temperature; Hour_sin; Month_cos; Month_sin; Hour_cos
+12 features,12,Wind_Speed; Power_lag_1h; Power_lag_2h; Blade_Pitch_Angle; Day_cos; Nacelle_Position_sin; Day_sin; Wind_Direction_cos; Power_lag_24h; Wind_Direction_sin; Nacelle_Position_cos; Ambient_Temperature
+8 features,8,Wind_Speed; Power_lag_1h; Power_lag_2h; Blade_Pitch_Angle; Day_cos; Nacelle_Position_sin; Day_sin; Wind_Direction_cos
+5 features,5,Wind_Speed; Power_lag_1h; Power_lag_2h; Blade_Pitch_Angle; Day_cos

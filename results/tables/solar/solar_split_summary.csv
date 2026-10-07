@@ -1,0 +1,2 @@
+total_rows,dev_rows,test_rows,dev_start,dev_end,test_start,test_end,split_timestamp,cv_folds
+35000,28000,7000,2021-05-24 18:00:00,2024-10-01 20:00:00,2024-10-01 21:00:00,2025-08-23 03:00:00,2024-10-01 21:00:00,3

@@ -1,0 +1,17 @@
+feature_name,category,unit,source,leakage_safe
+Wind_Speed,Physical Weather,m/s,Anemometer mean across 6 turbines,True
+Wind_Direction_sin,Directional,"[-1, 1]",sin(rad(Wind_Direction)) vector mean,True
+Wind_Direction_cos,Directional,"[-1, 1]",cos(rad(Wind_Direction)) vector mean,True
+Nacelle_Position_sin,Operational,"[-1, 1]",sin(rad(Nacelle_Position)) vector mean,True
+Nacelle_Position_cos,Operational,"[-1, 1]",cos(rad(Nacelle_Position)) vector mean,True
+Blade_Pitch_Angle,Operational,deg,Blade pitch A mean across 6 turbines,True
+Ambient_Temperature,Physical Weather,deg C,Nacelle ambient temp mean across 6 turbines,True
+Hour_sin,Temporal Diurnal,"[-1, 1]",sin(2 * pi * hour / 24),True
+Hour_cos,Temporal Diurnal,"[-1, 1]",cos(2 * pi * hour / 24),True
+Day_sin,Temporal Seasonal,"[-1, 1]",sin(2 * pi * day / 365.25),True
+Day_cos,Temporal Seasonal,"[-1, 1]",cos(2 * pi * day / 365.25),True
+Month_sin,Temporal Annual,"[-1, 1]",sin(2 * pi * month / 12),True
+Month_cos,Temporal Annual,"[-1, 1]",cos(2 * pi * month / 12),True
+Power_lag_1h,Autoregressive Lag,kW,Farm_Power at time t-1,True
+Power_lag_2h,Autoregressive Lag,kW,Farm_Power at time t-2,True
+Power_lag_24h,Autoregressive Lag,kW,Farm_Power at time t-24,True

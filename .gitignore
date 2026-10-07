@@ -1,0 +1,63 @@
+# =============================================================================
+# Git Ignore - Renewable Energy Forecasting Pipeline
+# =============================================================================
+
+# Ignore data directories (raw CSVs, intermediate SCADA, processed matrices)
+data/
+data/**
+
+# Ignore trained model binary weights and serialized checkpoints
+*.joblib
+*.pkl
+*.pickle
+results/models/
+results/models/**
+**/results/models/
+**/results/models/**
+
+# Ignore Python bytecode, caches, and test artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+*/__pycache__/
+
+# CatBoost training diagnostics & metrics
+catboost_info/
+catboost_info/**
+**/catboost_info/
+**/catboost_info/**
+
+# Scratch scripts, temporary files, debug dumps
+scratch/
+scratch/**
+**/scratch/
+**/scratch/**
+
+# Environment variables, credentials, secrets & virtual environments
+.env
+.env.*
+*.env
+*.cfg
+*.ini
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE, editor & OS artifacts
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Agent metadata
+.agents/
+.gemini/

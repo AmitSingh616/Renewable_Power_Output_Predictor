@@ -1,0 +1,3 @@
+Horizon,Model,Feature Subset,Feature Count,Test RMSE (kW),Test MAE (kW),Test R²,Inference Latency (ms/sample)
+24-Hour-Ahead (Direct),Random Forest (Tuned),8 features,8,4462.9443,3966.0815,-5.2847,0.0345
+24-Hour-Ahead (Direct),Persistence Baseline (Y_t),Farm_Power only,1,2373.3266,1612.3537,-0.7773,0.0

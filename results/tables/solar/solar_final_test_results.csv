@@ -1,0 +1,6 @@
+Model,Test RMSE,Test MAE,Test R²,Inference Time (s),Latency (ms/sample)
+Ridge,15.1805,11.1562,0.9423,0.0035,0.0005
+Random Forest,9.3896,3.9657,0.9779,0.0459,0.0066
+XGBoost,9.6494,4.3136,0.9767,0.007,0.001
+LightGBM,9.4697,4.1528,0.9776,0.0117,0.0017
+CatBoost,9.5927,4.4218,0.977,0.0052,0.0007

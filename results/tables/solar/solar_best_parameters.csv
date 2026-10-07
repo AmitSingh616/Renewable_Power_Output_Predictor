@@ -1,0 +1,5 @@
+model,best_cv_rmse,best_params,n_trials,random_seed
+Random Forest,10.973108409858318,"{'n_estimators': 100, 'max_depth': 14, 'min_samples_split': 4, 'min_samples_leaf': 4, 'max_features': 1.0}",15,42
+XGBoost,11.29068559869053,"{'n_estimators': 80, 'max_depth': 5, 'learning_rate': 0.08980131249183412, 'subsample': 0.6, 'colsample_bytree': 0.7, 'min_child_weight': 3}",15,42
+LightGBM,10.961855757676597,"{'n_estimators': 60, 'num_leaves': 39, 'max_depth': 8, 'learning_rate': 0.10200369308281163, 'subsample': 0.6, 'colsample_bytree': 0.9}",15,42
+CatBoost,11.121414253560177,"{'iterations': 120, 'depth': 6, 'learning_rate': 0.10372960067462543, 'l2_leaf_reg': 3.0}",15,42

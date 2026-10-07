@@ -1,0 +1,30 @@
+,value
+source_power_file,96-Site_DKA-MasterMeter1.csv
+source_weather_file,101-Site_DKA-WeatherStation.csv
+raw_power_rows,1767903
+raw_weather_rows,1761522
+raw_power_date_min,2008-09-12 05:55:00
+raw_power_date_max,2025-08-23 05:00:00
+power_sampling_freq_min,5.0
+power_dup_timestamps,0
+weather_dup_timestamps,0
+ap_floor_nan_count,0
+ap_ceil_nan_count,0
+hourly_power_rows,148537
+hourly_weather_rows,148537
+merged_hourly_rows,148537
+post_ghi_filter_rows,145863
+rows_removed_ghi_filter,2674
+rows_dropped_nan_target,29
+final_rows,145834
+final_date_min,2008-09-12 05:00:00
+final_date_max,2025-08-23 04:00:00
+target_col,Active_Power
+target_definition,Whole master-meter Active_Power from 96-Site_DKA-MasterMeter1.csv
+target_min,-1.7873
+target_max,209.1591
+target_mean,44.8871
+target_median,0.0969
+target_pct_negative,49.78
+target_pct_zero,0.02
+target_pct_positive,50.2

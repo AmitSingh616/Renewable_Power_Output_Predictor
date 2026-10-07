@@ -1,0 +1,18 @@
+feature,category,source,description,availability_time,transformation
+Global_Horizontal_Radiation,physical,WeatherStation,Global horizontal irradiance in W/m²,t,hourly mean (GHI > 1 daytime filter)
+Diffuse_Horizontal_Radiation,physical,WeatherStation,Diffuse horizontal irradiance in W/m²,t,hourly mean
+Weather_Temperature_Celsius,physical,WeatherStation,Ambient air temperature in Celsius,t,hourly mean
+Weather_Relative_Humidity,physical,WeatherStation,Relative humidity percentage (0-100%),t,hourly mean
+Wind_Speed,physical,WeatherStation,Wind speed in m/s (~52% unobserved preserved),t,hourly mean
+Wind_Direction_sin,physical,WeatherStation,Sine circular component of wind direction,t,sin(2*pi*Wind_Direction/360)
+Wind_Direction_cos,physical,WeatherStation,Cosine circular component of wind direction,t,cos(2*pi*Wind_Direction/360)
+Hour_sin,temporal,Timestamp,Sine cyclical encoding of hour of day,t,sin(2*pi*hour/24)
+Hour_cos,temporal,Timestamp,Cosine cyclical encoding of hour of day,t,cos(2*pi*hour/24)
+Day_sin,temporal,Timestamp,Sine cyclical encoding of day of year,t,sin(2*pi*day_of_year/365.25)
+Day_cos,temporal,Timestamp,Cosine cyclical encoding of day of year,t,cos(2*pi*day_of_year/365.25)
+Month_sin,temporal,Timestamp,Sine cyclical encoding of month of year,t,sin(2*pi*month/12)
+Month_cos,temporal,Timestamp,Cosine cyclical encoding of month of year,t,cos(2*pi*month/12)
+Power_lag_1h,lag,Active_Power,Master-meter active power 1 hour prior to t,t-1,Active_Power.shift(1)
+Power_lag_2h,lag,Active_Power,Master-meter active power 2 hours prior to t,t-2,Active_Power.shift(2)
+Power_lag_24h,lag,Active_Power,Master-meter active power 24 hours prior to t (same hour previous day),t-24,Active_Power.shift(24)
+target_t1,target,Active_Power,Master-meter active power 1 hour ahead (forecast target),t+1,Active_Power.shift(-1)
