@@ -1,9 +1,3 @@
-"""
-Phase 3-4: Chronological Evaluation and Model Benchmarking for Solar Power Forecasting
-========================================================================================
-(Optimized for faster training & high terminal verbosity)
-"""
-
 import sys, os, time, warnings
 sys.stdout.reconfigure(encoding="utf-8")
 warnings.filterwarnings("ignore")
@@ -29,9 +23,6 @@ from catboost import CatBoostRegressor
 # Optuna set to INFO to print the exact score and hyperparameter guess after every single trial
 optuna.logging.set_verbosity(optuna.logging.INFO)
 
-# ---------------------------------------------------------------------------
-# Directories & Paths
-# ---------------------------------------------------------------------------
 ROOT         = Path(__file__).resolve().parents[2]
 DATA_PATH    = ROOT / "data" / "processed" / "solar" / "solar_features_1h.csv"
 MODEL_DIR    = ROOT / "results" / "models" / "solar"
@@ -151,9 +142,6 @@ def main():
     }])
     split_summary.to_csv(TABLE_DIR / "solar_split_summary.csv", index=False)
 
-    # ---------------------------------------------------------------------------
-    # TimeSeriesSplit on Development Set
-    # ---------------------------------------------------------------------------
     sec("2. TIME SERIES SPLIT (Expanding Window, n_splits=3)")
     cv = TimeSeriesSplit(n_splits=N_CV_SPLITS)
     for fold, (tr_idx, val_idx) in enumerate(cv.split(X_dev), 1):
@@ -161,9 +149,6 @@ def main():
         va_start, va_end = df.index[val_idx[0]], df.index[val_idx[-1]]
         print(f"  Fold {fold}: Train={len(tr_idx):,} ({tr_start} -> {tr_end}) | Val={len(val_idx):,} ({va_start} -> {va_end})")
 
-    # ---------------------------------------------------------------------------
-    # Baseline: Ridge Regression
-    # ---------------------------------------------------------------------------
     sec("3. BASELINE: RIDGE REGRESSION")
     def build_ridge():
         return Pipeline([
@@ -179,9 +164,7 @@ def main():
     print(f"    Ridge CV R²  : {res_ridge['r2_mean']:.4f} ± {res_ridge['r2_std']:.4f}")
     print(f"    Training time: {res_ridge['fit_time']:.2f}s")
 
-    # ---------------------------------------------------------------------------
-    # Optuna Hyperparameter Tuning
-    # ---------------------------------------------------------------------------
+
     sec(f"4. OPTUNA TUNING ({N_OPTUNA_TRIALS} trials per tree model on dev CV)")
     best_params = {}
     tuned_cv_results = {"Ridge": res_ridge}
@@ -357,9 +340,6 @@ def main():
     df_params = pd.DataFrame(param_records)
     df_params.to_csv(TABLE_DIR / "solar_best_parameters.csv", index=False)
 
-    # ---------------------------------------------------------------------------
-    # 5. Model Comparison on Development Cross-Validation
-    # ---------------------------------------------------------------------------
     sec("5. DEVELOPMENT CROSS-VALIDATION COMPARISON")
     cv_table_rows = []
     models_order = ["Ridge", "Random Forest", "XGBoost", "LightGBM", "CatBoost"]
@@ -390,9 +370,7 @@ def main():
         "CatBoost": build_best_cb,
     }
 
-    # ---------------------------------------------------------------------------
-    # 6. Fit Selected Best Model on Entire Dev Set & Evaluate on Untouched Test Set
-    # ---------------------------------------------------------------------------
+
     sec(f"6. FINAL MODEL FIT ({best_model_name}) ON DEV SET & TEST EVALUATION")
     final_pipe = pipe_builders[best_model_name]()
     print(f"  Fitting {best_model_name} on entire development set ({len(X_dev):,} rows) ...")
@@ -445,9 +423,6 @@ def main():
     df_test.to_csv(TABLE_DIR / "solar_final_test_results.csv", index=False)
     print(df_test.to_string(index=False))
 
-    # ---------------------------------------------------------------------------
-    # 8. Write Markdown Benchmark Report
-    # ---------------------------------------------------------------------------
     sec("8. WRITING BENCHMARK REPORT")
     def to_md_table(d):
         header = "| " + " | ".join(d.columns) + " |\n"
