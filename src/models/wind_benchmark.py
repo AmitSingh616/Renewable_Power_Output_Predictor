@@ -45,9 +45,6 @@ from catboost import CatBoostRegressor
 # Keep Optuna logging concise (WARNING to reduce terminal clutter)
 optuna.logging.set_verbosity(optuna.logging.WARNING)
 
-# ---------------------------------------------------------------------------
-# Directories & Paths
-# ---------------------------------------------------------------------------
 ROOT         = Path(__file__).resolve().parents[2]
 DATA_PATH    = ROOT / "data" / "processed" / "wind" / "wind_features_1h.csv"
 MODEL_DIR    = ROOT / "results" / "models" / "wind"
@@ -154,9 +151,6 @@ def main(dry_run=False):
     # TimeSeriesSplit on Development Set
     cv = TimeSeriesSplit(n_splits=N_CV_SPLITS)
 
-    # ---------------------------------------------------------------------------
-    # 2. Baseline Model: Ridge Regression
-    # ---------------------------------------------------------------------------
     sec("2. BASELINE: RIDGE REGRESSION")
     def build_ridge():
         return Pipeline([
@@ -169,9 +163,6 @@ def main(dry_run=False):
     ridge_cv = cross_validate_pipeline(build_ridge, X_dev, y_dev, cv)
     print(f"     Ridge CV RMSE: {ridge_cv['rmse_mean']:.4f} kW (+/- {ridge_cv['rmse_std']:.4f}) | R2: {ridge_cv['r2_mean']:.4f}")
 
-    # ---------------------------------------------------------------------------
-    # 3. Hyperparameter Tuning with Optuna (15 trials each)
-    # ---------------------------------------------------------------------------
     sec(f"3. HYPERPARAMETER TUNING ({trials_budget} trials per tree model)")
     best_params = {}
     tuned_cv_results = {"Ridge": ridge_cv}
@@ -367,9 +358,6 @@ def main(dry_run=False):
     print("\n  Summary Cross-Validation Results:")
     print(df_cv.to_string(index=False))
 
-    # ---------------------------------------------------------------------------
-    # 4. Final Evaluation on Untouched Test Set
-    # ---------------------------------------------------------------------------
     sec("4. EVALUATION ON UNTOUCHED FINAL TEST SET (20%)")
     final_builders = {
         "Ridge": build_ridge,
@@ -422,9 +410,6 @@ def main(dry_run=False):
     best_model_name = df_test.iloc[0]["Model"]
     print(f"\n  >>> BEST OVERALL WIND MODEL: {best_model_name} (Test RMSE = {df_test.iloc[0]['Test RMSE (kW)']} kW)")
 
-    # ---------------------------------------------------------------------------
-    # 5. Visualization & Report
-    # ---------------------------------------------------------------------------
     sec("5. GENERATING COMPARISON FIGURE & REPORT")
     plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
     fig, axes = plt.subplots(1, 3, figsize=(16, 5))
