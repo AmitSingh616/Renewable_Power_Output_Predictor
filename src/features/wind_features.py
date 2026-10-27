@@ -35,9 +35,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-# ---------------------------------------------------------------------------
-# Directories & Paths
-# ---------------------------------------------------------------------------
 ROOT = Path(__file__).resolve().parents[2]
 INPUT_PATH   = ROOT / "data" / "processed" / "wind" / "wind_hourly_clean.csv"
 OUTPUT_PATH  = ROOT / "data" / "processed" / "wind" / "wind_features_1h.csv"
@@ -61,9 +58,6 @@ def main():
     print(f"  Time range: {df.index.min()} -> {df.index.max()}")
     print(f"  Input columns: {list(df.columns)}")
 
-    # ---------------------------------------------------------------------------
-    # Step 2: Feature Engineering
-    # ---------------------------------------------------------------------------
     sec("2. FEATURE ENGINEERING")
 
     # A. Physical / Directional features
@@ -104,9 +98,6 @@ def main():
     print("  [+] Generating target: target_t1 = Farm_Power.shift(-1)...")
     df["target_t1"] = df["Farm_Power"].shift(-1)
 
-    # ---------------------------------------------------------------------------
-    # Step 3: Define Final Modeling Columns & Handle Initial Lags
-    # ---------------------------------------------------------------------------
     MODEL_FEATURES = [
         "Wind_Speed",
         "Wind_Direction_sin",
@@ -136,9 +127,6 @@ def main():
     print(f"  Rows before lag/target drop: {n_before:,}")
     print(f"  Rows after lag/target drop : {n_after:,} (dropped {n_before - n_after} boundary rows)")
 
-    # ---------------------------------------------------------------------------
-    # Step 4: Strict Leakage & Integrity Verification
-    # ---------------------------------------------------------------------------
     sec("3. LEAKAGE CHECKS & INTEGRITY AUDIT")
 
     # 1. Sorted timestamps
@@ -177,9 +165,6 @@ def main():
     assert "target_t1" not in MODEL_FEATURES, "Leakage: target_t1 in features!"
     assert "Farm_Power" not in MODEL_FEATURES, "Leakage: current Farm_Power in features!"
 
-    # ---------------------------------------------------------------------------
-    # Step 5: Save Datasets and Documentation
-    # ---------------------------------------------------------------------------
     sec("4. SAVING FEATURE DATASET & METRICS")
 
     # Save features CSV
