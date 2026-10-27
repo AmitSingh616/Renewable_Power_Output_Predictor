@@ -1,18 +1,3 @@
-"""
-Phase 2 - Solar Feature Engineering
-====================================
-Constructs ML feature set from solar_hourly_clean.csv:
-1. Applies locked daylight rule: GHI > 1.
-2. Creates 6 cyclical temporal features (Hour, Day of year, Month sin/cos).
-3. Creates 3 historical power lag features (Power_lag_1h, Power_lag_2h, Power_lag_24h).
-4. Creates 2 circular wind direction features (Wind_Direction_sin, Wind_Direction_cos).
-5. Defines target_t1 = Active_Power.shift(-1).
-6. Runs sanity & leakage verification checks.
-7. Saves feature dataset, metadata CSV, and feature engineering report.
-
-Does NOT train models or perform feature selection.
-"""
-
 import sys, os
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -20,9 +5,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-# ---------------------------------------------------------------------------
-# Paths
-# ---------------------------------------------------------------------------
 ROOT         = Path(__file__).resolve().parents[2]
 PROCESSED    = ROOT / "data" / "processed" / "solar"
 RESULTS      = ROOT / "results" / "tables"
@@ -51,10 +33,6 @@ def main():
     print(f"  Input date range : {df_raw.index.min()} -> {df_raw.index.max()}")
     print(f"  Input columns    : {list(df_raw.columns)}")
 
-    # ---------------------------------------------------------------------------
-    # Reindex to strict regular hourly grid before computing lags and target
-    # Ensures shift(k) maps strictly to t - k hours in physical time.
-    # ---------------------------------------------------------------------------
     sec("2. REGULAR HOURLY GRID ALIGNMENT")
     full_idx = pd.date_range(df_raw.index.min(), df_raw.index.max(), freq="h")
     df_grid = df_raw.reindex(full_idx)
@@ -62,9 +40,6 @@ def main():
     print(f"  Full hourly grid length: {len(df_grid):,}")
     print(f"  Unobserved hourly slots: {len(df_grid) - len(df_raw):,}")
 
-    # ---------------------------------------------------------------------------
-    # 3. Create Power Lags & Target on Regular Grid
-    # ---------------------------------------------------------------------------
     sec("3. POWER LAG & TARGET CONSTRUCTION")
     df_grid["Power_lag_1h"]  = df_grid["Active_Power"].shift(1)
     df_grid["Power_lag_2h"]  = df_grid["Active_Power"].shift(2)
@@ -75,9 +50,7 @@ def main():
     print("  Created Power_lag_24h = Active_Power.shift(24)  [t - 24h]")
     print("  Created target_t1     = Active_Power.shift(-1)  [t + 1h]")
 
-    # ---------------------------------------------------------------------------
-    # 4. Cyclical Temporal Features
-    # ---------------------------------------------------------------------------
+
     sec("4. CYCLICAL TEMPORAL FEATURES")
     hours = df_grid.index.hour
     day_of_year = df_grid.index.dayofyear
@@ -93,9 +66,6 @@ def main():
     print("  Created Day_sin, Day_cos     (period = 365.25)")
     print("  Created Month_sin, Month_cos (period = 12)")
 
-    # ---------------------------------------------------------------------------
-    # 5. Circular Wind Direction Encoding
-    # ---------------------------------------------------------------------------
     sec("5. WIND DIRECTION ENCODING")
     wd_deg = df_grid["Wind_Direction"]
     wd_rad = np.deg2rad(wd_deg)
@@ -105,9 +75,6 @@ def main():
     print("  Created Wind_Direction_cos = cos(2*pi*Wind_Direction/360)")
     print("  (Preserved NaNs where Wind_Direction was missing; raw Wind_Direction excluded from X)")
 
-    # ---------------------------------------------------------------------------
-    # 6. Apply Locked Daylight Filter (GHI > 1)
-    # ---------------------------------------------------------------------------
     sec("6. LOCKED DAYLIGHT FILTER (GHI > 1)")
     rows_before_ghi = len(df_raw)
     ghi_mask = df_grid["Global_Horizontal_Radiation"] > 1.0
@@ -118,9 +85,6 @@ def main():
     print(f"  Rows after  GHI > 1 filtering : {rows_after_ghi:,}")
     print(f"  Rows removed by GHI > 1 rule  : {rows_removed_ghi:,}")
 
-    # ---------------------------------------------------------------------------
-    # 7. Lag / Target Boundary Handling
-    # ---------------------------------------------------------------------------
     sec("7. BOUNDARY & USABILITY FILTERING")
     # Rows with missing required lags or missing target cannot be used for supervised learning
     req_history_target = ["Power_lag_1h", "Power_lag_2h", "Power_lag_24h", "target_t1"]
@@ -132,9 +96,6 @@ def main():
     print(f"  Daylight rows with complete lags/target: {n_after_boundary:,}")
     print(f"  Rows removed due to lag/target boundaries: {rows_removed_boundary:,}")
 
-    # ---------------------------------------------------------------------------
-    # 8. Feature Selection & Column Layout
-    # ---------------------------------------------------------------------------
     sec("8. FINAL FEATURE MATRIX SPECIFICATION")
     FEATURE_COLS = [
         # Physical / weather (5)
@@ -170,9 +131,6 @@ def main():
     for i, col in enumerate(FEATURE_COLS, 1):
         print(f"    {i:2d}. {col}")
 
-    # ---------------------------------------------------------------------------
-    # 9. Sanity & Leakage Verification Checks
-    # ---------------------------------------------------------------------------
     sec("9. SANITY & LEAKAGE VERIFICATION CHECKS")
 
     # 9.1 Timestamps
@@ -224,18 +182,12 @@ def main():
         assert not any(kw in fc.lower() for kw in ["t+1", "target", "lead", "future"]), f"FAIL: Future variable in features: {fc}"
     print("  [PASS] No future-derived variables or target present in feature list.")
 
-    # ---------------------------------------------------------------------------
-    # 10. Missingness Inspection
-    # ---------------------------------------------------------------------------
     sec("10. MISSINGNESS INSPECTION")
     miss_series = df_save[FEATURE_COLS + [TARGET_COL]].isna().sum()
     miss_pct    = (df_save[FEATURE_COLS + [TARGET_COL]].isna().mean() * 100).round(2)
     miss_df = pd.DataFrame({"missing_count": miss_series, "missing_pct": miss_pct})
     print(miss_df.to_string())
 
-    # ---------------------------------------------------------------------------
-    # 11. Save Feature Dataset
-    # ---------------------------------------------------------------------------
     sec("11. SAVING FEATURE DATASET")
     df_save.to_csv(OUTPUT_CSV)
     print(f"  Saved features CSV : {OUTPUT_CSV}")
@@ -246,9 +198,6 @@ def main():
     assert df_check.shape == df_save.shape, "FAIL: Reload shape mismatch!"
     print(f"  Reload verification: OK, shape = {df_check.shape}")
 
-    # ---------------------------------------------------------------------------
-    # 12. Save Feature Definitions Metadata
-    # ---------------------------------------------------------------------------
     sec("12. SAVING FEATURE METADATA DEFINITIONS")
     meta_rows = [
         {"feature": "Global_Horizontal_Radiation", "category": "physical", "source": "WeatherStation",
@@ -290,9 +239,7 @@ def main():
     df_meta.to_csv(METADATA_CSV, index=False)
     print(f"  Saved metadata CSV : {METADATA_CSV}")
 
-    # ---------------------------------------------------------------------------
-    # 13. Write Feature Engineering Markdown Report
-    # ---------------------------------------------------------------------------
+  
     sec("13. WRITING FEATURE ENGINEERING REPORT")
     def to_md_table(d):
         header = "| Column | " + " | ".join(d.columns) + " |\n"
@@ -306,81 +253,6 @@ def main():
     for r in meta_rows:
         meta_table_md += f"| `{r['feature']}` | {r['category']} | {r['source']} | {r['availability_time']} | {r['transformation']} |\n"
 
-    report_content = f"""# Solar Feature Engineering Report — Phase 2
-
-> **The solar forecasting target is the whole master-meter `Active_Power`.**
-> 
-> **Daylight observations are selected using the fixed criterion `Global_Horizontal_Radiation > 1`.**
-
----
-
-## 1. Input Dataset
-- **Source**: `{INPUT_CSV.name}`
-- **Input row count**: {rows_before_ghi:,}
-- **Date range**: {df_raw.index.min()} to {df_raw.index.max()}
-
----
-
-## 2. Locked Daylight Filtering (`GHI > 1`)
-- **Criterion**: `Global_Horizontal_Radiation > 1`
-- **Rows before daylight filtering**: {rows_before_ghi:,}
-- **Rows after daylight filtering**: {rows_after_ghi:,}
-- **Rows removed by `GHI > 1`**: {rows_removed_ghi:,}
-
----
-
-## 3. Boundary & History Filtering
-- **Required history / target**: `Power_lag_1h`, `Power_lag_2h`, `Power_lag_24h`, `target_t1`
-- **Rows removed due to lag/target boundaries**: {rows_removed_boundary:,}
-- **Final usable supervised rows**: {len(df_save):,}
-
----
-
-## 4. Final Feature Specification
-- **Total model features**: {len(FEATURE_COLS)}
-- **Feature categories**:
-  - **Physical / Weather (5)**: `Global_Horizontal_Radiation`, `Diffuse_Horizontal_Radiation`, `Weather_Temperature_Celsius`, `Weather_Relative_Humidity`, `Wind_Speed`
-  - **Wind Direction Circular (2)**: `Wind_Direction_sin`, `Wind_Direction_cos`
-  - **Cyclical Time (6)**: `Hour_sin`, `Hour_cos`, `Day_sin`, `Day_cos`, `Month_sin`, `Month_cos`
-  - **Power History Lags (3)**: `Power_lag_1h`, `Power_lag_2h`, `Power_lag_24h`
-- **Target (1)**: `target_t1` (Active_Power at t+1)
-
----
-
-## 5. Feature Definitions Table
-{meta_table_md}
-
----
-
-## 6. Missingness Summary
-{to_md_table(miss_df)}
-
-*Note on missingness: `Wind_Speed` has ~52% unobserved values originating from sensor gaps in the raw source; missingness is preserved as instructed without artificial fabrication.*
-
----
-
-## 7. Leakage & Integrity Verification
-- **Timestamps strictly sorted ascending**: YES
-- **Zero duplicate timestamps**: YES
-- **Cyclical features strictly within [-1, 1]**: YES
-- **Wind direction trigonometry identity ($sin^2 + cos^2 = 1$)**: VERIFIED
-- **Lag timing verification**: Exactly matches chronological $t-1$, $t-2$, $t-24$ hours
-- **Target timing verification**: Exactly matches chronological $t+1$ hour
-- **Target excluded from feature space**: YES (`target_t1` not in $X$)
-- **Zero future-derived variables in $X$**: YES
-- **No rolling statistics constructed**: YES
-
----
-
-## 8. Final Dataset Summary
-- **Output file**: `{OUTPUT_CSV}`
-- **Final shape**: {df_save.shape}
-- **Date range**: {df_save.index.min()} to {df_save.index.max()}
-
----
-
-*Phase 2 complete. Models, scaling, and feature selection not started.*
-"""
     REPORT_MD.write_text(report_content, encoding="utf-8")
     print(f"  Saved markdown report: {REPORT_MD}")
 
