@@ -5,15 +5,6 @@ Model: Final Random Forest model from wind modeling / benchmark.
 Features: 16 features (or fitted pipeline features).
 Test Set: Chronological final 20% test period.
 Sample: Deterministic sample of 800 test observations (fixed random_state=42).
-
-Outputs:
-1. results/tables/wind_shap_importance.csv
-2. results/figures/shap/wind/wind_shap_bar.png
-3. results/figures/shap/wind/wind_shap_beeswarm.png
-4. results/figures/shap/wind/wind_shap_dependence_top1.png
-5. results/figures/shap/wind/wind_shap_dependence_top2.png
-6. results/figures/shap/wind/wind_shap_local_waterfall.png
-7. results/wind_shap_report.md
 """
 
 import sys, os, time, warnings
@@ -28,9 +19,6 @@ import joblib
 import shap
 import matplotlib.pyplot as plt
 
-# ---------------------------------------------------------------------------
-# Directories & Paths
-# ---------------------------------------------------------------------------
 ROOT = Path(__file__).resolve().parents[2]
 DATA_PATH = ROOT / "data" / "processed" / "wind" / "wind_features_1h.csv"
 MODEL_PATH = ROOT / "results" / "models" / "wind" / "wind_random_forest_final.joblib"
@@ -115,9 +103,6 @@ def main():
         index=X_test_sample.index
     )
 
-    # ---------------------------------------------------------------------------
-    # 2. Compute TreeExplainer SHAP Values
-    # ---------------------------------------------------------------------------
     sec("2. COMPUTING SHAP VALUES (TreeExplainer)")
     t0 = time.time()
     explainer = shap.TreeExplainer(model)
@@ -127,9 +112,6 @@ def main():
     print(f"  SHAP computation finished in {t_shap:.2f}s")
     print(f"  SHAP values shape: {shap_values.shape}")
 
-    # ---------------------------------------------------------------------------
-    # 3. Global Feature Importance Table
-    # ---------------------------------------------------------------------------
     sec("3. GLOBAL SHAP FEATURE IMPORTANCE TABLE")
     mean_abs_shap = np.mean(np.abs(shap_values), axis=0)
     df_importance = pd.DataFrame({
@@ -152,9 +134,7 @@ def main():
     top_feature_2 = df_importance.iloc[1]["feature"]
     top_feature_3 = df_importance.iloc[2]["feature"]
 
-    # ---------------------------------------------------------------------------
-    # 4. Generate SHAP Plots
-    # ---------------------------------------------------------------------------
+   
     sec("4. GENERATING PUBLICATION-READY SHAP PLOTS")
     plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
 
