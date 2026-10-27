@@ -3,20 +3,6 @@ Wind Feature Selection & Sensor-Cost Reduction
 ===============================================
 Kelmarsh Wind Farm (~4,313 hourly observations).
 Model: Best tuned tree model from Phase 3-4 (Random Forest).
-
-Objective:
-1. Mutual Information ranking on development set (80%).
-2. RFECV with TimeSeriesSplit(n_splits=3) on development set.
-3. Define 4 subsets: Full (16), 12, 8, 5 features based on MI & RFECV rankings.
-4. Evaluate tuned Random Forest across all 4 subsets on dev CV and untouched test set (20%).
-5. Save metrics tables and comparison plot.
-
-Constraints:
-- Complete dataset used (no 35k row cap).
-- Chronological 80/20 train/test split.
-- Final test set remains untouched during feature selection.
-- Median imputation fitted inside CV folds/dev split only.
-- Fixed hyperparameter set from Phase 4 for Random Forest.
 """
 
 import sys, os, time, warnings, ast
@@ -36,9 +22,7 @@ from sklearn.feature_selection import mutual_info_regression, RFECV
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.ensemble import RandomForestRegressor
 
-# ---------------------------------------------------------------------------
-# Directories & Paths
-# ---------------------------------------------------------------------------
+
 ROOT = Path(__file__).resolve().parents[2]
 DATA_PATH = ROOT / "data" / "processed" / "wind" / "wind_features_1h.csv"
 TABLE_DIR = ROOT / "results" / "tables"
@@ -162,9 +146,6 @@ def main(dry_run=False):
     print(f"  Development rows (80%): {n_dev:,} ({df.index[0]} to {df.index[n_dev-1]})")
     print(f"  Final test rows  (20%): {n_test:,} ({df.index[n_dev]} to {df.index[-1]})")
 
-    # ---------------------------------------------------------------------------
-    # Step 1: Mutual Information on Development Data
-    # ---------------------------------------------------------------------------
     sec("2. MUTUAL INFORMATION ANALYSIS (DEV SET ONLY)")
     imputer = SimpleImputer(strategy="median", keep_empty_features=True)
     X_dev_imputed = pd.DataFrame(
@@ -193,9 +174,6 @@ def main(dry_run=False):
     df_mi.to_csv(WIND_TAB_DIR / "wind_mutual_information.csv", index=False)
     print(f"\n  Saved MI rankings -> {TABLE_DIR / 'wind_mutual_information.csv'}")
 
-    # ---------------------------------------------------------------------------
-    # Step 2: RFECV with TimeSeriesSplit on Development Data
-    # ---------------------------------------------------------------------------
     sec("3. RFECV FEATURE RANKING (DEV SET ONLY, TSS=3)")
     cv = TimeSeriesSplit(n_splits=N_CV_SPLITS)
 
@@ -234,9 +212,7 @@ def main(dry_run=False):
     print("\n  Consolidated Ranking (MI + RFECV):")
     print(df_rankings.to_string(index=False))
 
-    # ---------------------------------------------------------------------------
-    # Step 3: Define 4 Subsets (Full 16, 12, 8, 5)
-    # ---------------------------------------------------------------------------
+    
     sec("4. DEFINING FEATURE SUBSETS")
     sorted_features = df_rankings["feature"].tolist()
 
@@ -263,9 +239,7 @@ def main(dry_run=False):
     df_subsets.to_csv(WIND_TAB_DIR / "wind_feature_subsets.csv", index=False)
     print(f"\n  Saved subsets -> {TABLE_DIR / 'wind_feature_subsets.csv'}")
 
-    # ---------------------------------------------------------------------------
-    # Step 4: Evaluate Subsets on Dev CV and Final Untouched Test Set
-    # ---------------------------------------------------------------------------
+
     sec("5. EVALUATION OF FEATURE SUBSETS")
     eval_records = []
 
@@ -313,9 +287,7 @@ def main(dry_run=False):
     df_results.to_csv(WIND_TAB_DIR / "wind_feature_reduction_results.csv", index=False)
     print(f"\n  Saved reduction results -> {TABLE_DIR / 'wind_feature_reduction_results.csv'}")
 
-    # ---------------------------------------------------------------------------
-    # Step 5: Generate Comparison Visualization
-    # ---------------------------------------------------------------------------
+
     sec("6. GENERATING FEATURE REDUCTION VISUALIZATION")
     plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
     fig, axes = plt.subplots(1, 3, figsize=(16, 5))
