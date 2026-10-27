@@ -7,13 +7,6 @@ Objective:
 3. Define 4 subsets: Full (16), 12, 8, 5 features based on MI & RFECV rankings.
 4. Evaluate tuned LightGBM across all 4 subsets on dev CV and untouched test set.
 5. Save metrics tables and comparison plot.
-
-Constraints:
-- Dataset cap: tail(35000)
-- Strict chronological 80/20 train/test split.
-- Final test set remains untouched during feature selection.
-- Median imputation fitted inside CV folds/dev split only.
-- Fixed hyperparameter set from Phase 4 for LightGBM.
 """
 
 import sys, os, time, warnings
@@ -33,9 +26,6 @@ from sklearn.feature_selection import mutual_info_regression, RFECV
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from lightgbm import LGBMRegressor
 
-# ---------------------------------------------------------------------------
-# Directories & Paths
-# ---------------------------------------------------------------------------
 ROOT = Path(__file__).resolve().parents[2]
 DATA_PATH = ROOT / "data" / "processed" / "solar" / "solar_features_1h.csv"
 TABLE_DIR = ROOT / "results" / "tables"
@@ -148,9 +138,6 @@ def main():
     print(f"  Development rows (80%): {n_dev:,} ({df.index[0]} to {df.index[n_dev-1]})")
     print(f"  Final test rows  (20%): {n_test:,} ({df.index[n_dev]} to {df.index[-1]})")
 
-    # ---------------------------------------------------------------------------
-    # Step 1: Mutual Information on Development Data
-    # ---------------------------------------------------------------------------
     sec("2. MUTUAL INFORMATION ANALYSIS (DEV SET ONLY)")
     imputer = SimpleImputer(strategy="median", keep_empty_features=True)
     X_dev_imputed = pd.DataFrame(
@@ -181,9 +168,7 @@ def main():
     df_mi.to_csv(mi_file2, index=False)
     print(f"\n  Saved MI rankings -> {mi_file1}")
 
-    # ---------------------------------------------------------------------------
-    # Step 2: RFECV with TimeSeriesSplit on Development Data
-    # ---------------------------------------------------------------------------
+  
     sec("3. RFECV FEATURE RANKING (DEV SET ONLY, TSS=3)")
     cv = TimeSeriesSplit(n_splits=N_CV_SPLITS)
 
@@ -221,14 +206,8 @@ def main():
     print("\n  Consolidated Ranking (MI + RFECV):")
     print(df_rankings.to_string(index=False))
 
-    # ---------------------------------------------------------------------------
-    # Step 3: Define 4 Subsets (Full 16, 12, 8, 5)
-    # ---------------------------------------------------------------------------
     sec("4. DEFINING FEATURE SUBSETS")
 
-    # Top features based on consolidated rankings & physical relevance:
-    # 5 features: Top solar driver (GHI), primary lag (Power_lag_1h), primary diurnal cycle (Hour_sin, Hour_cos), 2nd lag/temp
-    # Strictly take top-N from consolidated ranking
     sorted_features = df_rankings["feature"].tolist()
 
     subsets = {
@@ -256,9 +235,6 @@ def main():
     df_subsets.to_csv(subsets_file2, index=False)
     print(f"\n  Saved subsets -> {subsets_file1}")
 
-    # ---------------------------------------------------------------------------
-    # Step 4: Evaluate Subsets on Dev CV and Final Untouched Test Set
-    # ---------------------------------------------------------------------------
     sec("5. EVALUATION OF FEATURE SUBSETS")
     eval_records = []
 
@@ -308,9 +284,6 @@ def main():
     df_results.to_csv(results_file2, index=False)
     print(f"\n  Saved reduction results -> {results_file1}")
 
-    # ---------------------------------------------------------------------------
-    # Step 5: Generate Comparison Visualization
-    # ---------------------------------------------------------------------------
     sec("6. GENERATING FEATURE REDUCTION VISUALIZATION")
     plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
     fig, axes = plt.subplots(1, 3, figsize=(16, 5))
