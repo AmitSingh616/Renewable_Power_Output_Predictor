@@ -30,9 +30,6 @@ from sklearn.impute import SimpleImputer
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from lightgbm import LGBMRegressor
 
-# ---------------------------------------------------------------------------
-# Directories & Paths
-# ---------------------------------------------------------------------------
 ROOT = Path(__file__).resolve().parents[2]
 DATA_PATH = ROOT / "data" / "processed" / "solar" / "solar_features_1h.csv"
 TABLE_DIR = ROOT / "results" / "tables"
@@ -135,9 +132,6 @@ def main():
     X = df_clean[features_to_use]
     y_24 = df_clean["target_t24"]
 
-    # ---------------------------------------------------------------------------
-    # Chronological Split (80% dev, 20% test)
-    # ---------------------------------------------------------------------------
     sec("2. CHRONOLOGICAL SPLIT (80% DEV / 20% TEST)")
     n_total = len(df_clean)
     n_dev = int(n_total * 0.80)
@@ -149,9 +143,6 @@ def main():
     print(f"  Development rows (80%): {n_dev:,} ({df_clean.index[0]} to {df_clean.index[n_dev-1]})")
     print(f"  Final test rows  (20%): {n_test:,} ({df_clean.index[n_dev]} to {df_clean.index[-1]})")
 
-    # ---------------------------------------------------------------------------
-    # Model Training and Prediction
-    # ---------------------------------------------------------------------------
     sec("3. TRAIN LIGHTGBM ON 24-HOUR HORIZON")
     pipe = Pipeline([
         ("imputer", SimpleImputer(strategy="median", keep_empty_features=True)),
@@ -169,8 +160,6 @@ def main():
     rmse, mae, r2 = eval_metrics(y_test, y_pred)
     latency_ms = (t_inf / len(X_test)) * 1000.0
 
-    # Also compute persistence baseline for 24h: Y_(t+24) = Y_t (or lag 24)
-    # If daytime filter causes jumps, persistence can use Active_Power directly as t forecast
     baseline_pred = df_clean.iloc[n_dev:]["Active_Power"].values
     base_rmse, base_mae, base_r2 = eval_metrics(y_test, baseline_pred)
 
@@ -216,9 +205,6 @@ def main():
     df_metrics.to_csv(metrics_path2, index=False)
     print(f"  Saved 24h metrics -> {metrics_path1}")
 
-    # ---------------------------------------------------------------------------
-    # Plot Actual vs Predicted (Sample Window)
-    # ---------------------------------------------------------------------------
     sec("4. GENERATING 24-HOUR FORECAST PLOT")
     plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
     fig, axes = plt.subplots(2, 1, figsize=(14, 8), sharex=False)
